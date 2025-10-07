@@ -41,6 +41,9 @@
 const container = document.getElementById('matches-container');
 const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
 
+// ⚡ Replace this with your fixed player URL
+const FIXED_PLAYER_URL = 'https://femcodem3u8plyr.pages.dev/player?url=YOUR_STREAM_URL_HERE';
+
 const STREAM_META = {
   adfree_stream:   { label: 'Ad-Free', classes: 'bg-green-600 hover:bg-green-700 text-white' },
   dai_stream:      { label: 'DAI',     classes: 'bg-blue-600 hover:bg-blue-700 text-white' },
@@ -104,7 +107,7 @@ fetch(DATA_URL)
       const btnWrap = document.createElement('div');
       btnWrap.className = 'flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-4';
 
-      // Add all buttons exactly as in original code
+      // Add all buttons exactly as in original code (links from JSON)
       if(isLive){
         ['adfree_stream','dai_stream','Primary_Playback_URL','fancode_cdn','dai_google_cdn','cloudfront_cdn','sony_cdn'].forEach(key => {
           const url = match[key] || (match.STREAMING_CDN && match.STREAMING_CDN[key]);
@@ -124,7 +127,7 @@ fetch(DATA_URL)
       `;
 
       if(isLive){
-        // Watch Now button - only embeds new player
+        // Watch Now button - ALWAYS uses FIXED_PLAYER_URL
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg mt-3 transition shadow-lg backdrop-blur-sm';
         toggleBtn.innerHTML = `<i class="fas fa-tv mr-2"></i>Watch Now`;
@@ -133,9 +136,7 @@ fetch(DATA_URL)
           let existingPlayer = card.querySelector('iframe');
           if(!existingPlayer){
             const iframe = document.createElement('iframe');
-            // Embed first available stream
-            const firstStream = match.adfree_stream || match.dai_stream || match.Primary_Playback_URL || match.fancode_cdn || '';
-            iframe.src = `https://femcodem3u8plyr.pages.dev/player?url=${encodeURIComponent(firstStream)}`;
+            iframe.src = FIXED_PLAYER_URL; // always your player
             iframe.width = '100%';
             iframe.height = '480';
             iframe.allowFullscreen = true;
