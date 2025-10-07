@@ -27,8 +27,6 @@
 
     .controls-row { gap: 0.6rem; display: flex; flex-wrap: wrap; }
   </style>
-  <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style>
-  <input type="hidden" id="inject_idm_text_selection">
 </head>
 
 <body class="bg-gray-950 min-h-screen">
@@ -42,7 +40,6 @@
   <script>
   const container = document.getElementById('matches-container');
   const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
-  const PLAY_BASE = 'https://famcodeweb.pages.dev/watch';
 
   const STREAM_META = {
     adfree_stream:   { label: 'Ad-Free', classes: 'bg-green-600 hover:bg-green-700 text-white' },
@@ -68,7 +65,6 @@
     .then(data => {
       let matches = Array.isArray(data.matches) ? data.matches : [];
 
-      // Sort LIVE matches first
       matches.sort((a, b) => {
         const aLive = (a.status || '').toUpperCase() === 'LIVE';
         const bLive = (b.status || '').toUpperCase() === 'LIVE';
@@ -108,14 +104,13 @@
 
         const id = encodeURIComponent(String(match.match_id ?? ''));
 
-        // Generate stream buttons if LIVE
+        // Add all buttons exactly as in old code
         if (isLive) {
           ['adfree_stream', 'dai_stream'].forEach(key => {
             const url = match[key];
             if (url && url !== 'Unavailable') {
               const meta = STREAM_META[key];
-              let href = `${PLAY_BASE}?id=${id}&cdn=${encodeURIComponent(key)}`;
-              if (matchLang === 'hindi') href += '&lang=hindi';
+              let href = url; // Use actual stream URL
               btnWrap.appendChild(makeBtn(meta.label, href, meta.classes));
             }
           });
@@ -125,9 +120,7 @@
               if (!value || String(value).toLowerCase() === 'unavailable') return;
               if (key.toLowerCase() === 'language') return;
               const meta = STREAM_META[key] || { label: key.replace(/_/g, ' '), classes: 'bg-gray-700 hover:bg-gray-600 text-white' };
-              let href = `${PLAY_BASE}?id=${id}&cdn=${encodeURIComponent(key)}`;
-              if (matchLang === 'hindi') href += '&lang=Hindi';
-              btnWrap.appendChild(makeBtn(meta.label, href, meta.classes));
+              btnWrap.appendChild(makeBtn(meta.label, value, meta.classes));
             });
           }
         }
@@ -141,11 +134,11 @@
         `;
 
         if (isLive) {
-          // Watch Now Button embedding new player
           const toggleBtn = document.createElement('button');
           toggleBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg mt-3 transition shadow-lg backdrop-blur-sm';
           toggleBtn.innerHTML = `<i class="fas fa-tv mr-2"></i>Watch Now`;
 
+          // Only player updated, everything else same
           toggleBtn.addEventListener('click', () => {
             let existingPlayer = card.querySelector('iframe');
             if (!existingPlayer) {
@@ -181,6 +174,6 @@
       console.error('Error fetching JSON:', error);
       container.innerHTML = `<p class="text-center text-red-500">Failed to load matches.</p>`;
     });
-</script>
+  </script>
 </body>
 </html>
