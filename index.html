@@ -5,24 +5,14 @@
   <title>Fancode - Matches</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="#">
-  <!-- Reliable Tailwind CDN -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
     body { background-color: #0f0f0f; color: #fff; }
-    .match-card {
-      transition: all 0.3s ease-in-out;
-      background: linear-gradient(145deg, #1a1a1a, #1f1f1f);
-    }
-    .match-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 25px 35px rgba(0, 0, 0, 0.45);
-    }
+    .match-card { transition: all 0.3s ease-in-out; background: linear-gradient(145deg, #1a1a1a, #1f1f1f); }
+    .match-card:hover { transform: translateY(-6px); box-shadow: 0 25px 35px rgba(0, 0, 0, 0.45); }
     .live-badge { animation: pulse 1.5s infinite; }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      50% { box-shadow: 0 0 15px 10px rgba(239, 68, 68, 0); }
-    }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.7);}50%{box-shadow:0 0 15px 10px rgba(239,68,68,0);} }
     .match-img { transition: transform 0.3s ease; }
     .match-card:hover .match-img { transform: scale(1.03); }
     .controls-row { gap: 0.6rem; display: flex; flex-wrap: wrap; }
@@ -31,9 +21,7 @@
 
 <body class="bg-gray-950 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 py-8 sm:py-10">
-    <h1 class="text-3xl sm:text-4xl font-bold text-center text-white mb-8 tracking-wide">
-      Fancode Live
-    </h1>
+    <h1 class="text-3xl sm:text-4xl font-bold text-center text-white mb-8 tracking-wide">Fancode Live</h1>
     <div id="matches-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
   </div>
 
@@ -41,7 +29,7 @@
 const container = document.getElementById('matches-container');
 const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
 
-// ⚡ Replace this with your fixed player URL
+// ⚡ Fixed player URL
 const FIXED_PLAYER_URL = 'https://femcodem3u8plyr.pages.dev/player?url=YOUR_STREAM_URL_HERE';
 
 const STREAM_META = {
@@ -68,82 +56,63 @@ fetch(DATA_URL)
   .then(data => {
     const matches = Array.isArray(data.matches) ? data.matches : [];
 
-    // Sort LIVE matches first
-    matches.sort((a, b) => {
-      const aLive = (a.status || '').toUpperCase() === 'LIVE';
-      const bLive = (b.status || '').toUpperCase() === 'LIVE';
-      return (bLive ? 1 : 0) - (aLive ? 1 : 0);
-    });
+    matches.sort((a,b)=> ((b.status||'').toUpperCase()==='LIVE'?1:0)-((a.status||'').toUpperCase()==='LIVE'?1:0));
 
     matches.forEach(match => {
       const isLive = (match.status || '').toUpperCase() === 'LIVE';
-      const imgSrc =
-        match.image ||
-        (match.image_cdn && (match.image_cdn.APP || match.image_cdn.TATAPLAY || match.image_cdn.PLAYBACK || match.image_cdn.BG_IMAGE)) ||
-        'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
+      const imgSrc = match.image || (match.image_cdn && (match.image_cdn.APP || match.image_cdn.TATAPLAY || match.image_cdn.PLAYBACK || match.image_cdn.BG_IMAGE)) || 'https://www.fancode.com/skillup-uploads/cms-media/Cricket_Fallback_Old_match-card.jpg';
 
       const card = document.createElement('div');
       card.className = `rounded-2xl overflow-hidden shadow-xl match-card border border-gray-800 ${isLive ? 'ring-2 ring-red-600' : ''}`;
 
-      const headerHTML = `
-        <div class="relative">
+      const headerHTML = `<div class="relative">
           <img src="${imgSrc}" alt="${match.title || 'Match'}" class="w-full h-48 sm:h-60 md:h-64 lg:h-72 object-cover object-top match-img">
-          ${isLive ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md live-badge">LIVE</span>` : ''}
-        </div>
-      `;
+          ${isLive?'<span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md live-badge">LIVE</span>':''}
+        </div>`;
 
       const title = match.title || 'Match';
       const tournament = match.tournament || '';
       const startTime = match.startTime || '';
-
-      let matchLang = '';
-      if (match.language) matchLang = String(match.language).toLowerCase();
-      else if (match.STREAMING_CDN && match.STREAMING_CDN.language) matchLang = String(match.STREAMING_CDN.language).toLowerCase();
-      const language = matchLang ? ` • ${matchLang}` : '';
-      const sub1 = tournament ? `${tournament}${language}` : (language ? language.slice(3) : '');
+      const language = match.language ? ` • ${match.language}` : '';
+      const sub1 = tournament ? `${tournament}${language}` : (language?language.slice(3):'');
       const sub2 = startTime ? `Start: ${startTime}` : '';
 
-      // Buttons wrapper - all buttons visible by default
       const btnWrap = document.createElement('div');
       btnWrap.className = 'flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-4';
 
-      // Add all buttons exactly as in original code (links from JSON)
       if(isLive){
-        ['adfree_stream','dai_stream','Primary_Playback_URL','fancode_cdn','dai_google_cdn','cloudfront_cdn','sony_cdn'].forEach(key => {
-          const url = match[key] || (match.STREAMING_CDN && match.STREAMING_CDN[key]);
-          if(url && url !== 'Unavailable'){
-            const meta = STREAM_META[key] || {label: key.replace(/_/g,' '), classes:'bg-gray-700 hover:bg-gray-600 text-white'};
-            btnWrap.appendChild(makeBtn(meta.label, url, meta.classes));
+        ['adfree_stream','dai_stream','Primary_Playback_URL','fancode_cdn','dai_google_cdn','cloudfront_cdn','sony_cdn'].forEach(key=>{
+          if(match[key] || (match.STREAMING_CDN && match.STREAMING_CDN[key])){
+            const href = `https://famcodeweb.pages.dev/watch?id=${encodeURIComponent(match.match_id)}&cdn=${encodeURIComponent(key)}`;
+            const meta = STREAM_META[key] || {label:key.replace(/_/g,' '), classes:'bg-gray-700 hover:bg-gray-600 text-white'};
+            btnWrap.appendChild(makeBtn(meta.label, href, meta.classes));
           }
         });
       }
 
       const body = document.createElement('div');
       body.className = 'p-5 sm:p-6';
-      body.innerHTML = `
-        <h2 class="text-xl sm:text-2xl font-semibold text-white mb-1">${title}</h2>
-        <p class="text-gray-400 text-sm mb-1">${sub1}</p>
-        <p class="text-sm text-gray-500 mb-2">${sub2}</p>
-      `;
+      body.innerHTML = `<h2 class="text-xl sm:text-2xl font-semibold text-white mb-1">${title}</h2>
+                        <p class="text-gray-400 text-sm mb-1">${sub1}</p>
+                        <p class="text-sm text-gray-500 mb-2">${sub2}</p>`;
 
       if(isLive){
-        // Watch Now button - ALWAYS uses FIXED_PLAYER_URL
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg mt-3 transition shadow-lg backdrop-blur-sm';
         toggleBtn.innerHTML = `<i class="fas fa-tv mr-2"></i>Watch Now`;
 
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click',()=>{
           let existingPlayer = card.querySelector('iframe');
           if(!existingPlayer){
             const iframe = document.createElement('iframe');
-            iframe.src = FIXED_PLAYER_URL; // always your player
+            iframe.src = FIXED_PLAYER_URL;
             iframe.width = '100%';
             iframe.height = '480';
             iframe.allowFullscreen = true;
             iframe.className = 'mt-3 rounded-lg';
             body.appendChild(iframe);
             toggleBtn.innerHTML = `<i class="fas fa-chevron-up mr-2"></i>Hide Player`;
-          } else {
+          }else{
             existingPlayer.remove();
             toggleBtn.innerHTML = `<i class="fas fa-tv mr-2"></i>Watch Now`;
           }
@@ -152,7 +121,7 @@ fetch(DATA_URL)
         body.appendChild(toggleBtn);
         body.appendChild(btnWrap);
 
-      } else {
+      }else{
         const noStream = document.createElement('div');
         noStream.className = 'w-full bg-gray-800 text-gray-400 py-2 px-4 rounded-lg mt-3 text-center';
         noStream.innerHTML = `<i class="fas fa-clock mr-2"></i>No stream available yet`;
@@ -162,13 +131,9 @@ fetch(DATA_URL)
       card.innerHTML = headerHTML;
       card.appendChild(body);
       container.appendChild(card);
-
     });
   })
-  .catch(err => {
-    console.error('Error loading matches:', err);
-    container.innerHTML = `<p class="text-center text-red-500">Failed to load matches.</p>`;
-  });
+  .catch(err=>{console.error('Error:',err); container.innerHTML='<p class="text-center text-red-500">Failed to load matches.</p>';});
 </script>
 </body>
 </html>
