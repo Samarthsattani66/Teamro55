@@ -100,29 +100,19 @@ fetch(DATA_URL)
       const sub1 = tournament ? `${tournament}${language}` : (language ? language.slice(3) : '');
       const sub2 = startTime ? `Start: ${startTime}` : '';
 
+      // Buttons wrapper - all buttons visible by default
       const btnWrap = document.createElement('div');
-      btnWrap.className = 'flex flex-col sm:flex-row sm:flex-wrap gap-3 hidden mt-4';
+      btnWrap.className = 'flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-4';
 
-      // All buttons exactly as in original code
-      if (isLive) {
-        // Main stream buttons
-        ['adfree_stream','dai_stream'].forEach(key => {
-          const url = match[key];
-          if(url && url !== 'Unavailable') {
-            const meta = STREAM_META[key];
+      // Add all buttons exactly as in original code
+      if(isLive){
+        ['adfree_stream','dai_stream','Primary_Playback_URL','fancode_cdn','dai_google_cdn','cloudfront_cdn','sony_cdn'].forEach(key => {
+          const url = match[key] || (match.STREAMING_CDN && match.STREAMING_CDN[key]);
+          if(url && url !== 'Unavailable'){
+            const meta = STREAM_META[key] || {label: key.replace(/_/g,' '), classes:'bg-gray-700 hover:bg-gray-600 text-white'};
             btnWrap.appendChild(makeBtn(meta.label, url, meta.classes));
           }
         });
-
-        // CDN buttons
-        if(match.STREAMING_CDN && typeof match.STREAMING_CDN === 'object') {
-          Object.entries(match.STREAMING_CDN).forEach(([key, value]) => {
-            if(!value || String(value).toLowerCase() === 'unavailable') return;
-            if(key.toLowerCase() === 'language') return;
-            const meta = STREAM_META[key] || { label: key.replace(/_/g,' '), classes:'bg-gray-700 hover:bg-gray-600 text-white'};
-            btnWrap.appendChild(makeBtn(meta.label, value, meta.classes));
-          });
-        }
       }
 
       const body = document.createElement('div');
@@ -134,7 +124,7 @@ fetch(DATA_URL)
       `;
 
       if(isLive){
-        // Watch Now Button - embeds new player
+        // Watch Now button - only embeds new player
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg mt-3 transition shadow-lg backdrop-blur-sm';
         toggleBtn.innerHTML = `<i class="fas fa-tv mr-2"></i>Watch Now`;
@@ -143,7 +133,9 @@ fetch(DATA_URL)
           let existingPlayer = card.querySelector('iframe');
           if(!existingPlayer){
             const iframe = document.createElement('iframe');
-            iframe.src = `https://femcodem3u8plyr.pages.dev/player?url=${encodeURIComponent(match.adfree_stream || match.dai_stream || '')}`;
+            // Embed first available stream
+            const firstStream = match.adfree_stream || match.dai_stream || match.Primary_Playback_URL || match.fancode_cdn || '';
+            iframe.src = `https://femcodem3u8plyr.pages.dev/player?url=${encodeURIComponent(firstStream)}`;
             iframe.width = '100%';
             iframe.height = '480';
             iframe.allowFullscreen = true;
@@ -176,7 +168,6 @@ fetch(DATA_URL)
     console.error('Error loading matches:', err);
     container.innerHTML = `<p class="text-center text-red-500">Failed to load matches.</p>`;
   });
-
 </script>
 </body>
 </html>
