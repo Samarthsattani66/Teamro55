@@ -30,7 +30,7 @@ const container = document.getElementById('matches-container');
 const DATA_URL = 'https://raw.githubusercontent.com/Jitendra-unatti/fancode/refs/heads/main/data/fancode.json';
 
 // ⚡ Fixed player URL
-const FIXED_PLAYER_URL = 'https://femcodem3u8plyr.pages.dev/player?url=YOUR_STREAM_URL_HERE';
+const FIXED_PLAYER_URL = 'https://samarthsattani66.github.io/trail066/?id=YOUR_STREAM_URL_HERE';
 
 const STREAM_META = {
   adfree_stream:   { label: 'Ad-Free', classes: 'bg-green-600 hover:bg-green-700 text-white' },
@@ -83,7 +83,7 @@ fetch(DATA_URL)
       if(isLive){
         ['adfree_stream','dai_stream','Primary_Playback_URL','fancode_cdn','dai_google_cdn','cloudfront_cdn','sony_cdn'].forEach(key=>{
           if(match[key] || (match.STREAMING_CDN && match.STREAMING_CDN[key])){
-            const href = `https://famcodeweb.pages.dev/watch?id=${encodeURIComponent(match.match_id)}&cdn=${encodeURIComponent(key)}`;
+            const href = `https://samarthsattani66.github.io/trail066/?id=${encodeURIComponent(match.match_id)}&cdn=${encodeURIComponent(key)}`;
             const meta = STREAM_META[key] || {label:key.replace(/_/g,' '), classes:'bg-gray-700 hover:bg-gray-600 text-white'};
             btnWrap.appendChild(makeBtn(meta.label, href, meta.classes));
           }
